@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 __version__ = "0.7"
     
-from seadevil.application import Application
 import sys
 
 try:
@@ -15,9 +14,3 @@ except ImportError:
         def atexit(*args): pass
         def send(*args): pass
     sys.modules["pyotherside"] = pyotherside()
-
-def main():
-    """Initialize application."""
-    global app
-    app = Application(interval=3)
-    app.start()
