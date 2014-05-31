@@ -30,6 +30,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import io.thp.pyotherside 1.2
 
 
 Page {
@@ -61,40 +62,51 @@ Page {
 
                 PageHeader {
                     id: title
-                    title: qsTr("UI Template")
+                    title: qsTr("SeaDevil")
                 }
 
 
             Row {
                 id: row_combo
-                //anchors.top: title.bottom
+
                 ComboBox {
                     id: computer_combo
                     width: 480
-                    label: qsTr("Select a host:")
+                    label: qsTr("Select a computer:")
 
                     menu: ContextMenu {
-                        MenuItem { text: "automatic" }
-                        MenuItem { text: "manual" }
-                        MenuItem { text: "high" }
+                        Repeater { 
+                            model: ListModel { id: computer_model }
+                            MenuItem { text: model.name }
+                        }
+                    }
+                    Component.onCompleted: {
+                            reload()
+                    }
+                    function reload() {
+                        computer_model.clear()
+                        py.call('seadevil.load_computers', [], function(result) {
+                                for (var i=0; i<result.length; i++) {
+                                    computer_model.append(result[i])
+                                }
+                        })
+                    }
+                    onCurrentIndexChanged: {
+                        py.call('seadevil.get_mac', [computer_combo.currentItem.text], function(result) {
+                            macaddress.text = result
+                        })
                     }
                 }
+
             }
 
             Row {
                 id: row_label
-                //anchors.top: row_combo.bottom
                 x: Theme.paddingLarge
 
                 Label {
                     id: label
-                    //anchors.top: row_label.top
-                    //anchors.left: row_label.right
-                    //anchors.leftMargin: 50
-                    //x: Theme.paddingLarge
-                   text: qsTr("Or type a mac address here:")
-                    //color: Theme.secondaryHighlightColor
-                    //font.pixelSize: Theme/
+                    text: qsTr("Or type a mac address here:")
                 }
             }
 
@@ -122,7 +134,9 @@ Page {
                     onClicked: {
                                    var dialog = pageStack.push("SaveDialog.qml", {"name": macaddress.text})
                                    dialog.accepted.connect(function() {
-                                       console.log("My name: " + dialog.name)
+                                        py.call("seadevil.save_computer", [dialog.name, macaddress.text], function() {
+                                            computer_combo.reload()
+                                        });
                                    })
                                }
 
@@ -142,8 +156,9 @@ Page {
                     //anchors.bottom: macaddress.bottom
                     //anchors.centerIn: row_wol
                     text: "Wake UP !"
-                    onClicked: console.log("Wake UP !")
-
+                    onClicked: py.call("seadevil.wake_on_lan", [macaddress.text], function() {
+                                    py.ready = true;
+                               });
                 }
             }
 

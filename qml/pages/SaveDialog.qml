@@ -34,8 +34,14 @@ import Sailfish.Silica 1.0
 Dialog {
     property string name
 
+    DialogHeader {
+        id: header
+        acceptText: "Save"
+    }
+
     TextField {
         id: nameField
+        anchors.top: header.bottom
         width: 480
         placeholderText: "Computer name:"
     }

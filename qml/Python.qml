@@ -8,9 +8,7 @@ Python {
         addImportPath(Qt.resolvedUrl(".."));
         console.log('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW')
         importModule("seadevil", function() {
-            py.call("seadevil.wol", [], function() {
-                py.ready = true;
-            });
+
         });
     }
 }
