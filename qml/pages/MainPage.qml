@@ -121,8 +121,8 @@ Page {
                     width: 300
                     //anchors.top: row_macaddress.top
                     //anchors.top: row_macaddress.top
-                    placeholderText: "xx:xx:xx:xx:xx:xx"
-                    validator: RegExpValidator { regExp: /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/ }
+                    placeholderText: "XXXXXXXXXXXX"
+                    validator: RegExpValidator { regExp: /^((([0-9A-Fa-f]{2}[:-]){5})|(([0-9A-Fa-f]{2}){5}))([0-9A-Fa-f]{2})$/ }
                     color: errorHighlight? "red" : Theme.primaryColor
                     inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
                 }
