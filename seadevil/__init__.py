@@ -31,8 +31,7 @@ if not os.path.exists(config_folder):
 if not os.path.isdir(config_folder):
     raise ("'%s' must be a folder" % config_folder)
 
-print(config_file)
-#config_file = "/home/nemo/.config/harbour-seadevil/config.ini"
+
 config = configparser.ConfigParser()
 
 def wake_on_lan(macaddress):
