@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=SeaDevil
+Exec=sailfish-qml harbour-seadevil
+Icon=SeaDevil
+Type=Application
+X-Nemo-Application-Type=silica-qt5
