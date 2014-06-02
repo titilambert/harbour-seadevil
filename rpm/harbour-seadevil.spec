@@ -16,7 +16,7 @@ Requires: python3-base
 Requires: sailfishsilica-qt5
 
 %description
-Wake on Lan application for sailfish OS.
+SeaDevil is a Wake on Lan application for sailfish OS. With SeaDevil you can wake your computers using your Jolla device. You can also save your favorite computers to wake them more quickly.
 
 %prep
 %setup -q
