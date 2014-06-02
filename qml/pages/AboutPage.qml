@@ -18,25 +18,114 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import io.thp.pyotherside 1.2
+
 
 Page {
     id: aboutpage
+    property string version: ''
+    forwardNavigation: false
 
-    PageHeader {
-        id: title
-        title: qsTr("About SeaDevil")
+    SilicaFlickable {
+        anchors.fill: parent
+
+
+        Column {
+            id: column
+
+            width: aboutpage.width
+            spacing: Theme.paddingLarge
+
+            PageHeader {
+                id: title
+                title: qsTr("About SeaDevil")
+            }
+
+            Row {
+                id: row_logo
+                x: Theme.paddingLarge
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                Image {
+                    id: image
+                    source: "../../data/harbour-seadevil.png"
+                }
+            }
+
+            Row {
+                id: row_title
+                x: Theme.paddingLarge
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                Label {
+                    text: qsTr("SeaDevil version: " + aboutpage.version)
+                }
+            }
+
+            Row {
+                x: Theme.paddingLarge
+
+                Label {
+                    font.pixelSize: 32
+                    text: qsTr("Author:")
+                }
+            }
+
+            Row {
+                x: 50
+
+                Label {
+                    font.pixelSize: 24
+                    text: qsTr("Thibault Cohen")
+                }
+            }
+
+            Row {
+                x: Theme.paddingLarge
+
+                Label {
+                    font.pixelSize: 32
+                    text: qsTr("Sources:")
+                }
+            }
+
+            Row {
+                x: 50
+
+                Label {
+                    font.pixelSize: 24
+                    text: qsTr("https://github.com/titilambert/harbour-seadevil")
+                }
+            }
+
+            Row {
+                x: Theme.paddingLarge
+
+                Label {
+                    font.pixelSize: 32
+                    text: qsTr("Thanks:")
+                }
+            }
+
+            Row {
+                x: 50
+
+                Label {
+                    font.pixelSize: 24
+                    text: qsTr("Doudounette")
+                }
+            }
+
+        }
     }
 
-    TextField {
-        id: nameField
-        anchors.top: header.bottom
-        width: 480
-        placeholderText: "Computer name:"
+    Python {
+        Component.onCompleted: {
+            addImportPath(Qt.resolvedUrl(".."));
+            importModule('seadevil', function() {
+                aboutpage.version = evaluate('seadevil.__version__');
+            });
+        }
     }
-
 
 }
-
-
-
-
