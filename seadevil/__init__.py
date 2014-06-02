@@ -127,6 +127,12 @@ def save_computer(name, macaddress):
         return
     if not 'computers' in config:
         config['computers'] = {}
+
+    if len(macaddress) == 12:
+        macaddress = ":".join(map(lambda x,y: x + y,
+                              macaddress[::2],
+                              macaddress[1::2]))
+
     config['computers'][name] = macaddress
     with open(config_file, 'w') as config_f:
         config.write(config_f)
