@@ -19,24 +19,24 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-CoverBackground {
-    Label {
-        id: label
-        anchors.centerIn: parent
-        text: "My Cover"
+Page {
+    id: aboutpage
+
+    PageHeader {
+        id: title
+        title: qsTr("About SeaDevil")
     }
 
-    CoverActionList {
-        id: coverAction
-
-        CoverAction {
-            iconSource: "image://theme/icon-cover-next"
-        }
-
-        CoverAction {
-            iconSource: "image://theme/icon-cover-pause"
-        }
+    TextField {
+        id: nameField
+        anchors.top: header.bottom
+        width: 480
+        placeholderText: "Computer name:"
     }
+
+
 }
+
+
 
 
