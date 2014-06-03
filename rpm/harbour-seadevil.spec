@@ -2,8 +2,8 @@
 %define __os_install_post %{___build_post}
 
 Name: harbour-seadevil
-Version: 0.1
-Release: 2
+Version: 0.5
+Release: 1
 Summary: WoL application for Sailfish OS
 License: GPLv3+
 URL: https://github.com/titilambert/harbour-seadevil
@@ -31,6 +31,10 @@ make DESTDIR=%{buildroot} PREFIX=/usr install
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %changelog
+* Tue Jun 03 2014 Thibault Cohen <titilambert@gmail.com> 0.5-1
+- Add computer management page
+- Add cover
+
 * Mon Jun 02 2014 Thibault Cohen <titilambert@gmail.com> 0.1-2
 - Fix desktop file
 

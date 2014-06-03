@@ -1,7 +1,7 @@
 # -*- coding: us-ascii-unix -*-
 
 name       = harbour-seadevil
-version    = 0.1
+version    = 0.5
 DESTDIR    =
 PREFIX     = /usr/local
 datadir    = $(DESTDIR)$(PREFIX)/share/$(name)
@@ -37,7 +37,7 @@ install:
 
 rpm:
 	mkdir -p $$HOME/rpmbuild/SOURCES
-	cp dist/$(name)-$(version).tar.xz $$HOME/rpmbuild/SOURCES
+	cp dist/$(name)-$(version).tar.gz $$HOME/rpmbuild/SOURCES
 	rpmbuild -ba rpm/$(name).spec
 	cp $$HOME/rpmbuild/RPMS/noarch/$(name)-$(version)-*.rpm rpm
 	cp $$HOME/rpmbuild/SRPMS/$(name)-$(version)-*.rpm rpm
