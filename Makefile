@@ -27,14 +27,13 @@ install:
 	@echo "Installing QML files..."
 	mkdir -p $(datadir)/qml/icons
 	cp qml/SeaDevil.qml $(datadir)/qml/$(name).qml
-	cp qml/[ABCDEFGHIJKLMNOPQRSTUVXYZ]*.qml $(datadir)/qml
-	cp qml/icons/*.png $(datadir)/qml/icons
+	cp -r qml/* $(datadir)/qml
 	@echo "Installing desktop file..."
 	mkdir -p $(desktopdir)
 	cp data/$(name).desktop $(desktopdir)
 	@echo "Installing icon..."
 	mkdir -p $(icondir)
-	cp data/seadevil.png $(icondir)/$(name).png
+	cp data/harbour-seadevil.png $(icondir)/$(name).png
 
 rpm:
 	mkdir -p $$HOME/rpmbuild/SOURCES
