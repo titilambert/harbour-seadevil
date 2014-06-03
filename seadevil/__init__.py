@@ -48,8 +48,16 @@ if not os.path.exists(config_folder):
 if not os.path.isdir(config_folder):
     raise ("'%s' must be a folder" % config_folder)
 
-
 config = configparser.ConfigParser()
+
+
+def transform_mac(macaddress):
+    if len(macaddress) == 12:
+        macaddress = ":".join(map(lambda x,y: x + y,
+                              macaddress[::2],
+                              macaddress[1::2]))
+    return macaddress
+
 
 def wake_on_lan(macaddress):
     """ Switches on remote computers using WOL. 
@@ -85,7 +93,35 @@ def wake_on_lan(macaddress):
         sock.sendto(send_data, ('<broadcast>', 7))
     except Exception(e):
         print(e.message)
+        return
 
+    # Save last macaddress used
+    try:
+        config.read(config_file)
+    except Exception(e):
+        print(e.message)
+        return
+  
+    if not 'general' in config:
+          config['general'] = {}
+
+    config['general']['last'] = macaddress
+    with open(config_file, 'w') as config_f:
+        config.write(config_f)
+
+
+def get_last_mac():
+    try:
+        config.read(config_file)
+    except Exception(e):
+        print(e.message)
+        return ''
+
+    if 'general' not in config.sections():
+        return ''
+
+    mac = config['general'].get('last', '')
+    return (transform_mac(mac), get_name(mac))
 
 
 def get_mac(name):
@@ -98,11 +134,30 @@ def get_mac(name):
     if 'computers' not in config.sections():
         return ''
 
-    return config['computers'][name]
+    return config['computers'].get(name, '')
 
 
+def get_name(macaddress):
+    try:
+        config.read(config_file)
+    except Exception(e):
+        print(e.message)
+        return ''
 
-def load_computers():
+    if 'computers' not in config.sections():
+        return ''
+
+    macaddress = transform_mac(macaddress)
+
+    names = [name for name, mac in config['computers'].items() if mac == macaddress]
+
+    if len(names) == 0:
+        return ''
+    else:
+        return names[0]
+
+
+def load_computers(first_name=None):
     try:
         config.read(config_file)
     except Exception(e):
@@ -112,10 +167,22 @@ def load_computers():
     if 'computers' not in config.sections():
         return []
 
+    # Prepare the computer list
     computers = config['computers']
     ret = []
+
+    # Prepare the first element of the combobox
+    if first_name is not None:
+        ret.append({'name': first_name,
+                    'value': computers.get(first_name)
+                    })
+
+    # Complete the combobox
     for name, mac in computers.items():
-        ret.append({'name': name, 'value': mac})
+        if first_name != name:
+            ret.append({'name': name, 'value': mac})
+
+
     return ret
 
 
@@ -128,12 +195,71 @@ def save_computer(name, macaddress):
     if not 'computers' in config:
         config['computers'] = {}
 
-    if len(macaddress) == 12:
-        macaddress = ":".join(map(lambda x,y: x + y,
-                              macaddress[::2],
-                              macaddress[1::2]))
+    macaddress = transform_mac(macaddress)
 
     config['computers'][name] = macaddress
     with open(config_file, 'w') as config_f:
         config.write(config_f)
 
+
+def set_cover(name, side):
+    try:
+        config.read(config_file)
+    except Exception(e):
+        print(e.message)
+        return
+    if not 'covers' in config:
+        config['covers'] = {}
+
+    # delete if is the same
+    if side in config['covers'] and config['covers'][side] == name:
+        del(config['covers'][side])
+    else:
+        config['covers'][side] = name
+
+    with open(config_file, 'w') as config_f:
+        config.write(config_f)
+
+
+def delete_computer(name):
+    try:
+        config.read(config_file)
+    except Exception(e):
+        print(e.message)
+        return False
+    if not 'computers' in config:
+        return False
+
+    if not name in config['computers']:
+        return False
+
+    del(config['computers'][name])
+
+    with open(config_file, 'w') as config_f:
+        config.write(config_f)
+    return True
+
+
+def get_cover(side):
+    try:
+        config.read(config_file)
+    except Exception(e):
+        print(e.message)
+        return False
+  
+    if not 'covers' in config:
+        return False
+  
+    if not side in config['covers']:
+        return False
+  
+    mac = get_mac(config['covers'][side])
+    if mac != '':
+        return mac
+    return False
+
+
+def wol_from_cover(side):
+    mac = get_cover(side)
+    if mac != False:
+        wake_on_lan(mac)

@@ -34,6 +34,10 @@ Page {
                 text: qsTr("About")
                 onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
             }
+            MenuItem {
+                text: qsTr("Computer list")
+                onClicked: pageStack.push(Qt.resolvedUrl("ComputersPage.qml"))
+            }
         }
 
         // Tell SilicaFlickable the height of its content.
@@ -64,24 +68,25 @@ Page {
 
                     menu: ContextMenu {
                         Repeater { 
+                            id: repeater_combo
                             model: ListModel { id: computer_model }
                             MenuItem { text: model.name }
                         }
                     }
-                    Component.onCompleted: {
-                            reload()
-                    }
-                    function reload() {
+
+                    function reload(selected_name) {
                         computer_model.clear()
-                        py.call('seadevil.load_computers', [], function(result) {
+                        py.call('seadevil.load_computers', [selected_name], function(result) {
                                 for (var i=0; i<result.length; i++) {
                                     computer_model.append(result[i])
                                 }
+                                
                         })
                     }
+
                     onCurrentIndexChanged: {
                         py.call('seadevil.get_mac', [computer_combo.currentItem.text], function(result) {
-                            macaddress.text = result
+                            macaddress_input.text = result
                         })
                     }
                 }
@@ -100,19 +105,18 @@ Page {
 
             Row {
                 id: row_macaddress
-                //width: page.width
-                //anchors.top: row_label.bottom
-
 
                 TextField {
-                    id: macaddress
+                    id: macaddress_input
                     width: 300
-                    //anchors.top: row_macaddress.top
-                    //anchors.top: row_macaddress.top
                     placeholderText: "XXXXXXXXXXXX"
                     validator: RegExpValidator { regExp: /^((([0-9A-Fa-f]{2}[:-]){5})|(([0-9A-Fa-f]{2}){5}))([0-9A-Fa-f]{2})$/ }
                     color: errorHighlight? "red" : Theme.primaryColor
                     inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
+                    Component.onCompleted: py.call('seadevil.get_last_mac', [], function(result) {
+                                                   computer_combo.reload(result[1])
+                                                   macaddress_input.text = result[0]
+                                                   })
                 }
 
                 Button {
@@ -120,38 +124,27 @@ Page {
                     text: qsTr("Save")
 
                     onClicked: {
-                                   var dialog = pageStack.push("SaveDialog.qml", {"name": macaddress.text})
+                                   var dialog = pageStack.push("SaveDialog.qml", {"name": macaddress_input.text})
                                    dialog.accepted.connect(function() {
-                                        py.call("seadevil.save_computer", [dialog.name, macaddress.text], function() {
-                                            computer_combo.reload()
+                                        py.call("seadevil.save_computer", [dialog.name, macaddress_input.text], function() {
+                                            computer_combo.reload(dialog.name)
                                         });
                                    })
                                }
-
 
                 }
             }
 
             Row {
                 id: row_wol
-                //width: page.width
-                //anchors.top: row_macaddress.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 Button {
-                    /*anchors { horizontalCenter: row_wol.horizontalCenter
-                              top: row_macaddress.bottom
-                    }*/
-                    //anchors.bottom: macaddress.bottom
-                    //anchors.centerIn: row_wol
                     text: "Wake UP !"
-                    onClicked: py.call("seadevil.wake_on_lan", [macaddress.text], function() {
+                    onClicked: py.call("seadevil.wake_on_lan", [macaddress_input.text], function() {
                                     py.ready = true;
                                });
                 }
             }
-
         }
     }
 }
-
-

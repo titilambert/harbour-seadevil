@@ -23,18 +23,20 @@ CoverBackground {
     Label {
         id: label
         anchors.centerIn: parent
-        text: "My Cover"
+        text: "SeaDevil"
     }
 
     CoverActionList {
         id: coverAction
 
         CoverAction {
-            iconSource: "image://theme/icon-cover-next"
+            iconSource: "image://theme/icon-cover-alarm"
+            onTriggered:  py.call('seadevil.wol_from_cover', ["left"])
         }
 
         CoverAction {
-            iconSource: "image://theme/icon-cover-pause"
+            iconSource: "image://theme/icon-cover-alarm"
+            onTriggered:  py.call('seadevil.wol_from_cover', ["right"])
         }
     }
 }

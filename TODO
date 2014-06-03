@@ -1,13 +1,4 @@
 SeaDevil
 ========
 
-* Saved last macaddress and fill the mac field with
-* Add favorite computers
-* Add cover computers
-* Add a new page to manage saved computers:
-  * delete saved computer
-  * edit saved computer
-  * set saved computer as favorite
-  * unset saved computer as favorite
-  * set saved computer as cover right
-  * set saved computer as cover left
+* Add confirm text for wake up and deletion
