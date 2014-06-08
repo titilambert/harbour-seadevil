@@ -48,7 +48,7 @@ Page {
 
                 Image {
                     id: image
-                    source: "../../data/harbour-seadevil.png"
+                    source: "../harbour-seadevil.png"
                 }
             }
 
@@ -59,6 +59,8 @@ Page {
 
                 Label {
                     text: qsTr("SeaDevil version: " + aboutpage.version)
+                    color: Theme.highlightColor
+                    font.pixelSize: Theme.fontSizeMedium
                 }
             }
 
@@ -66,7 +68,8 @@ Page {
                 x: Theme.paddingLarge
 
                 Label {
-                    font.pixelSize: 32
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.highlightColor
                     text: qsTr("Author:")
                 }
             }
@@ -75,7 +78,7 @@ Page {
                 x: 50
 
                 Label {
-                    font.pixelSize: 24
+                    font.pixelSize: Theme.fontSizeExtraSmall
                     text: qsTr("Thibault Cohen")
                 }
             }
@@ -84,7 +87,8 @@ Page {
                 x: Theme.paddingLarge
 
                 Label {
-                    font.pixelSize: 32
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.highlightColor
                     text: qsTr("Sources:")
                 }
             }
@@ -93,16 +97,42 @@ Page {
                 x: 50
 
                 Label {
-                    font.pixelSize: 24
-                    text: qsTr("https://github.com/titilambert/harbour-seadevil")
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    textFormat: Text.RichText
+                    text: qsTr("<style>a:link {color: " + Theme.highlightColor + ";}</style>SeaDevil <a href=\"https://github.com/titilambert/harbour-seadevil\">GitHub</a>")
+                    onLinkActivated: Qt.openUrlExternally("https://github.com/titilambert/harbour-seadevil")
                 }
             }
+
+
+            Row {
+                x: Theme.paddingLarge
+                
+                Label {
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.highlightColor
+                    text: qsTr("Bugs report:")
+                }   
+            }   
+            
+            Row {
+                x: 50
+                
+                Label {
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    textFormat: Text.RichText
+                    text: qsTr("<style>a:link {color: " + Theme.highlightColor + ";}</style>SeaDevil <a href=\"https://github.com/titilambert/harbour-seadevil/issues\">GitHub issues</a>")
+                    onLinkActivated: Qt.openUrlExternally("https://github.com/titilambert/harbour-seadevil/issues")
+                }   
+            }
+
 
             Row {
                 x: Theme.paddingLarge
 
                 Label {
-                    font.pixelSize: 32
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.highlightColor
                     text: qsTr("Thanks:")
                 }
             }
@@ -111,7 +141,7 @@ Page {
                 x: 50
 
                 Label {
-                    font.pixelSize: 24
+                    font.pixelSize: Theme.fontSizeExtraSmall
                     text: qsTr("Doudounette")
                 }
             }

@@ -34,6 +34,7 @@ install:
 	@echo "Installing icon..."
 	mkdir -p $(icondir)
 	cp data/harbour-seadevil.png $(icondir)/$(name).png
+	cp data/harbour-seadevil.png $(datadir)/qml/
 
 rpm:
 	mkdir -p $$HOME/rpmbuild/SOURCES
