@@ -2,7 +2,7 @@
 %define __os_install_post %{___build_post}
 
 Name: harbour-seadevil
-Version: 0.6
+Version: 0.7
 Release: 1
 Summary: WoL application for Sailfish OS
 License: GPLv3+

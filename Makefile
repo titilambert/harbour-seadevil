@@ -1,7 +1,7 @@
 # -*- coding: us-ascii-unix -*-
 
 name       = harbour-seadevil
-version    = 0.6
+version    = 0.7
 DESTDIR    =
 PREFIX     = /usr/local
 datadir    = $(DESTDIR)$(PREFIX)/share/$(name)
