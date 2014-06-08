@@ -24,6 +24,22 @@ import io.thp.pyotherside 1.2
 Page {
     id: page
 
+    onStatusChanged: {
+                      if (status == 2) {
+                          py.call('seadevil.get_last_mac', [], function(result) {
+                              if (result[1]) {
+                                  computer_combo.reload(result[1])
+                                  macaddress_input.text = result[0]
+                              }
+                              else {
+                                  computer_combo.reload()
+                              }
+                          })
+                      }
+                     }
+
+    RemorsePopup { id: wol_popup }
+
     // To enable PullDownMenu, place our content in a SilicaFlickable
     SilicaFlickable {
         anchors.fill: parent
@@ -67,6 +83,7 @@ Page {
                     label: qsTr("Select a computer:")
 
                     menu: ContextMenu {
+                        id: computer_contextmenu
                         Repeater { 
                             id: repeater_combo
                             model: ListModel { id: computer_model }
@@ -80,14 +97,16 @@ Page {
                                 for (var i=0; i<result.length; i++) {
                                     computer_model.append(result[i])
                                 }
-                                
+                                macaddress_input.text = result[0].value
                         })
                     }
 
                     onCurrentIndexChanged: {
-                        py.call('seadevil.get_mac', [computer_combo.currentItem.text], function(result) {
-                            macaddress_input.text = result
-                        })
+                        if (computer_combo.currentItem.text != ''){
+                            py.call('seadevil.get_mac', [computer_combo.currentItem.text], function(result) {
+                                macaddress_input.text = result
+                            })
+                        }
                     }
                 }
 
@@ -113,10 +132,6 @@ Page {
                     validator: RegExpValidator { regExp: /^((([0-9A-Fa-f]{2}[:-]){5})|(([0-9A-Fa-f]{2}){5}))([0-9A-Fa-f]{2})$/ }
                     color: errorHighlight? "red" : Theme.primaryColor
                     inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
-                    Component.onCompleted: py.call('seadevil.get_last_mac', [], function(result) {
-                                                   computer_combo.reload(result[1])
-                                                   macaddress_input.text = result[0]
-                                                   })
                 }
 
                 Button {
@@ -126,9 +141,7 @@ Page {
                     onClicked: {
                                    var dialog = pageStack.push("SaveDialog.qml", {"name": macaddress_input.text})
                                    dialog.accepted.connect(function() {
-                                        py.call("seadevil.save_computer", [dialog.name, macaddress_input.text], function() {
-                                            computer_combo.reload(dialog.name)
-                                        });
+                                        py.call("seadevil.save_computer", [dialog.name, macaddress_input.text])
                                    })
                                }
 
@@ -140,9 +153,33 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
                 Button {
                     text: "Wake UP !"
-                    onClicked: py.call("seadevil.wake_on_lan", [macaddress_input.text], function() {
-                                    py.ready = true;
-                               });
+                    onClicked: {
+                                if (macaddress_input.text != '') {
+                                    py.call("seadevil.get_name", [macaddress_input.text], function(result) {
+                                        if (result != '') {
+                                            var name = result
+                                        }
+                                        else {
+                                            var name = macaddress_input.text
+                                        }
+                                        wol_popup.execute("Wake up " + name, function() {
+                                            py.call("seadevil.wake_on_lan", [macaddress_input.text], function(result){
+                                                var message
+                                                var timeout
+                                                if (result[0] == false){
+                                                    message = "ERROR: " + result[1]
+                                                    timeout = 5000
+                                                }
+                                                else {
+                                                    message = "Magic packet sent"
+                                                    timeout = 3000
+                                                }
+                                                wol_popup.execute(message + "! Hide", function(){}, timeout)
+                                            })
+                                        }, 3000)
+                                   })
+                                }
+                    }
                 }
             }
         }

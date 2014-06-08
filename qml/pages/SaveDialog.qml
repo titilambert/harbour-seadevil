@@ -31,6 +31,7 @@ Dialog {
         id: nameField
         anchors.top: header.bottom
         width: 480
+        focus: true
         placeholderText: "Computer name:"
     }
 

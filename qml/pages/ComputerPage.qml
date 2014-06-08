@@ -26,6 +26,7 @@ Page {
     property string name
     property string mac
 
+    RemorsePopup {id: delete_popup}
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
     SilicaFlickable {
@@ -114,11 +115,14 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
                 Button {
                     text: "Delete"
-                    onClicked: py.call("seadevil.delete_computer", [name], function(result) {
+                    onClicked: {delete_popup.execute("Deleting", function () {
+                                    py.call("seadevil.delete_computer", [name], function(result) {
                                         if (result == true) {
                                             pageStack.pop()
                                         }
-                                      })
+                                    })
+                                })
+                    }
                 }
             }
         }

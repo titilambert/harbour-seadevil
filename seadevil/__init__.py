@@ -67,7 +67,6 @@ def wake_on_lan(macaddress):
         # or without any seperators.
         wake_on_lan('0F0FDF0FBFEF')
     """
-
     # Check macaddress format and try to compensate.
     if len(macaddress) == 12:
         pass
@@ -75,8 +74,7 @@ def wake_on_lan(macaddress):
         sep = macaddress[2]
         macaddress = macaddress.replace(sep, '')
     else:
-        return
-        raise ValueError('Incorrect MAC address format')
+        return False, 'Incorrect MAC address format'
 
     # Pad the synchronization stream.
     data = b'FFFFFFFFFFFF' + (macaddress * 20).encode()
@@ -93,9 +91,15 @@ def wake_on_lan(macaddress):
         sock.sendto(send_data, ('<broadcast>', 7))
     except Exception(e):
         print(e.message)
-        return
+        return False, e.message
+    # Save mac address as last used
+    save_last_mac(macaddress)
 
-    # Save last macaddress used
+    return True, 'OK'
+
+
+def save_last_mac(macaddress):
+    """ Save last macaddress used """
     try:
         config.read(config_file)
     except Exception(e):
@@ -111,6 +115,7 @@ def wake_on_lan(macaddress):
 
 
 def get_last_mac():
+    """ Get last macaddress used """
     try:
         config.read(config_file)
     except Exception(e):
@@ -125,6 +130,7 @@ def get_last_mac():
 
 
 def get_mac(name):
+    """ Get mac address from name """
     try:
         config.read(config_file)
     except Exception(e):
@@ -138,6 +144,7 @@ def get_mac(name):
 
 
 def get_name(macaddress):
+    """ Get name from mac address """
     try:
         config.read(config_file)
     except Exception(e):
@@ -158,6 +165,10 @@ def get_name(macaddress):
 
 
 def load_computers(first_name=None):
+    """ Load save computer list
+    If first_name is set
+    it will be the first of the list
+    """
     try:
         config.read(config_file)
     except Exception(e):
@@ -172,7 +183,7 @@ def load_computers(first_name=None):
     ret = []
 
     # Prepare the first element of the combobox
-    if first_name is not None:
+    if first_name is not None and first_name in computers.keys():
         ret.append({'name': first_name,
                     'value': computers.get(first_name)
                     })
@@ -182,11 +193,11 @@ def load_computers(first_name=None):
         if first_name != name:
             ret.append({'name': name, 'value': mac})
 
-
     return ret
 
 
 def save_computer(name, macaddress):
+    """ Save computer name and mac in config file """
     try:
         config.read(config_file)
     except Exception(e):
@@ -201,8 +212,11 @@ def save_computer(name, macaddress):
     with open(config_file, 'w') as config_f:
         config.write(config_f)
 
+    save_last_mac(macaddress)
+
 
 def set_cover(name, side):
+    """ Save a computer name as cover right or left """
     try:
         config.read(config_file)
     except Exception(e):
@@ -222,6 +236,7 @@ def set_cover(name, side):
 
 
 def delete_computer(name):
+    """ Delete computer from config file """
     try:
         config.read(config_file)
     except Exception(e):
@@ -241,6 +256,7 @@ def delete_computer(name):
 
 
 def get_cover(side):
+    """ Get COVER mac address from config file """
     try:
         config.read(config_file)
     except Exception(e):
@@ -260,6 +276,7 @@ def get_cover(side):
 
 
 def wol_from_cover(side):
+    """ Wake up from a cover """
     mac = get_cover(side)
     if mac != False:
         wake_on_lan(mac)

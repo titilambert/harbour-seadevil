@@ -24,7 +24,8 @@ import io.thp.pyotherside 1.2
 Page {
     id: computers_page
 
-    onStatusChanged: { if (status == 1) {
+    onStatusChanged: {
+                      if (status == 1) {
                         py.call('seadevil.load_computers', [], function(result) {
                                             computer_model.clear()
                                             for (var i=0; i<result.length; i++) {
