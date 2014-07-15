@@ -23,14 +23,22 @@ import socket
 import struct
 import sys
 import os
-import configparser
+try:
+    import configparser
+    config = configparser.ConfigParser()
+except:
+    pass
+
+try:
+    import dbus
+except:
+    pass
 
 try:
     import pyotherside
 except ImportError:
-    import sys
     # Allow testing Python backend alone.
-    print("PyOtherSide not found, continuing anyway!", file=sys.stderr)
+    # print("PyOtherSide not found, continuing anyway!")
 
     class pyotherside:
         def atexit(*args): pass
@@ -48,7 +56,6 @@ if not os.path.exists(config_folder):
 if not os.path.isdir(config_folder):
     raise ("'%s' must be a folder" % config_folder)
 
-config = configparser.ConfigParser()
 
 
 def transform_mac(macaddress):
@@ -57,6 +64,25 @@ def transform_mac(macaddress):
                               macaddress[::2],
                               macaddress[1::2]))
     return macaddress
+
+
+def dbus_notify(pre_title, pre_message, title, message):
+    bus = dbus.SessionBus()
+    object = bus.get_object('org.freedesktop.Notifications','/org/freedesktop/Notifications')
+    interface = dbus.Interface(object,'org.freedesktop.Notifications')
+    #print(interface.GetCapabilities())
+
+    interface.Notify("SeaDevil",
+                     0,
+                     #"icon-m-notifications",
+                     "harbour-seadevil",
+                     title,
+                     message,
+                     dbus.Array(["default", ""]),
+                     dbus.Dictionary({"x-nemo-preview-body": pre_message,
+                                      "x-nemo-preview-summary": pre_title},
+                                      signature='sv'),
+                     0)
 
 
 def wake_on_lan(macaddress):
@@ -252,6 +278,14 @@ def delete_computer(name):
 
     with open(config_file, 'w') as config_f:
         config.write(config_f)
+
+    desktop_file_name = get_desktop_file_name(name)
+    desktop_file_path = os.path.join(os.getenv("HOME"),
+                                     ".local/share/applications/",
+                                     desktop_file_name)
+    if has_desktop_file(name):
+        os.remove(desktop_file_path)
+
     return True
 
 
@@ -280,3 +314,40 @@ def wol_from_cover(side):
     mac = get_cover(side)
     if mac != False:
         wake_on_lan(mac)
+
+
+def get_desktop_file_name(name):
+    return "seafile-" + name + ".desktop"
+
+
+def set_desktop_file(name):
+    data = {}
+    data['name'] = name
+    data['mac'] = get_mac(name)
+    data['icon'] = "harbour-seadevil"
+    data['exec'] = """python /usr/share/harbour-seadevil/scripts/seadevil-cli.py "%(mac)s" "%(name)s" """ % data
+    data['comment'] = "Seafile shortcut desktop file for %(name)s/%(mac)s" % data
+    desktop_file_name = get_desktop_file_name(name)
+    desktop_file_path = os.path.join(os.getenv("HOME"),
+                                     ".local/share/applications/",
+                                     desktop_file_name)
+    if not has_desktop_file(name):
+        content = ("[Desktop Entry]\n"
+                   "Type=Application\n"
+                   "Name=%(name)s\n"
+                   "Icon=%(icon)s\n"
+                   "Exec=%(exec)s\n"
+                   "Comment=%(comment)s\n" % data)
+        f = open(desktop_file_path, "w")
+        f.write(content)
+        f.close()
+    else:
+        os.remove(desktop_file_path)
+
+
+def has_desktop_file(name):
+    desktop_file_name = get_desktop_file_name(name)
+    desktop_file_path = os.path.join(os.getenv("HOME"),
+                                     ".local/share/applications/",
+                                      desktop_file_name)
+    return os.path.exists(desktop_file_path)

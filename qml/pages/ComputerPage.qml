@@ -110,6 +110,25 @@ Page {
                 }
             }
 
+
+            Row {
+                id: desktop_file_row
+
+                TextSwitch {
+                    width: column.width
+                    id: desktop_file_switch
+                    text: "Launcher shortcut"
+                    description: "Add to/delete from Launcher"
+                    onClicked: py.call('seadevil.set_desktop_file', [name])
+                    Component.onCompleted: py.call('seadevil.has_desktop_file', [name], function(result) {
+                                                    if (result) {
+                                                        desktop_file_switch.checked = true
+                                                    }
+                                                   })
+                }
+            }
+
+
             Row {
                 id: delete_row
                 anchors.horizontalCenter: parent.horizontalCenter
