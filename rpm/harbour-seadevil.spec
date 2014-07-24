@@ -2,7 +2,7 @@
 %define __os_install_post %{___build_post}
 
 Name: harbour-seadevil
-Version: 0.8
+Version: 0.9
 Release: 1
 Summary: WoL application for Sailfish OS
 License: GPLv3+
@@ -27,14 +27,15 @@ mkdir -p %{buildroot}/%{_datadir}/%{name}/doc
 cp AUTHORS COPYING NEWS README TODO %{buildroot}/%{_datadir}/%{name}/doc
 
 %files
-%doc AUTHORS COPYING NEWS README TODO
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
+%docdir %{_datadir}/%{name}/doc/
 
 %changelog
-* Thu Jul 24 2014 Thibault Cohen <titilambert@gmail.com> 1.0-1
+* Thu Jul 24 2014 Thibault Cohen <titilambert@gmail.com> 0.9-1
 - Clean packaging
+- Fix pylint Warnings
 
 * Tue Jul 15 2014 Thibault Cohen <titilambert@gmail.com> 0.8-1
 - SeaDevil can now be added to Launcher

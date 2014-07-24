@@ -18,7 +18,7 @@
 Python file for SeaDevil
 """
 
-__version__ = "0.8"
+__version__ = "0.9"
 
 
 import socket
@@ -61,7 +61,7 @@ except ImportError:
 
 # SeaDevil config folder
 CONFIG_FOLDER = os.path.join(os.environ.get('HOME'),
-                             "/.config/harbour-seadevil/")
+                             ".config/harbour-seadevil/")
 # SeaDevil config file path
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, "config.ini")
 

@@ -3,6 +3,7 @@ Releasing a New Version
 
  * Do final quality checks
    $ pyflakes3 seadevil
+   $ pep8 seadevil
  * Bump version numbers
    - seadevil/__init__.py
    - rpm/*.spec
