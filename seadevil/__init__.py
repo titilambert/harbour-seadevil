@@ -46,7 +46,8 @@ except ImportError:
     sys.modules["pyotherside"] = pyotherside()
 
 
-config_folder = "/home/nemo/.config/harbour-seadevil/"
+config_folder = os.path.join(os.environ.get('HOME'),
+                             "/.config/harbour-seadevil/")
 config_file = os.path.join(config_folder, "config.ini")
 
 # Create config folder

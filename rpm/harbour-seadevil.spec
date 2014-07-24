@@ -23,6 +23,8 @@ SeaDevil is a Wake on Lan application for sailfish OS. With SeaDevil you can wak
 
 %install
 make DESTDIR=%{buildroot} PREFIX=/usr install
+mkdir -p %{buildroot}/%{_datadir}/%{name}/doc
+cp AUTHORS COPYING NEWS README TODO %{buildroot}/%{_datadir}/%{name}/doc
 
 %files
 %doc AUTHORS COPYING NEWS README TODO
@@ -31,6 +33,9 @@ make DESTDIR=%{buildroot} PREFIX=/usr install
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %changelog
+* Thu Jul 24 2014 Thibault Cohen <titilambert@gmail.com> 1.0-1
+- Clean packaging
+
 * Tue Jul 15 2014 Thibault Cohen <titilambert@gmail.com> 0.8-1
 - SeaDevil can now be added to Launcher
 
