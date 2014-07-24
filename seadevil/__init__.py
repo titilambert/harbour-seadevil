@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
 # Copyright (C) 2014 Thibault Cohen
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,9 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+Python file for SeaDevil
+"""
 
 __version__ = "0.8"
- 
+
 
 import socket
 import struct
@@ -25,13 +27,13 @@ import sys
 import os
 try:
     import configparser
-    config = configparser.ConfigParser()
-except:
+    CONFIG = configparser.ConfigParser()
+except Exception as exp:
     pass
 
 try:
     import dbus
-except:
+except Exception as exp:
     pass
 
 try:
@@ -41,53 +43,80 @@ except ImportError:
     # print("PyOtherSide not found, continuing anyway!")
 
     class pyotherside:
-        def atexit(*args): pass
-        def send(*args): pass
+        """ Fake class """
+
+        def __init__(self):
+            """ Fake function """
+            pass
+
+        def atexit(*args):
+            """ Fake function """
+            pass
+
+        def send(*args):
+            """ Fake function """
+            pass
+
     sys.modules["pyotherside"] = pyotherside()
 
-
-config_folder = os.path.join(os.environ.get('HOME'),
+# SeaDevil config folder
+CONFIG_FOLDER = os.path.join(os.environ.get('HOME'),
                              "/.config/harbour-seadevil/")
-config_file = os.path.join(config_folder, "config.ini")
+# SeaDevil config file path
+CONFIG_FILE = os.path.join(CONFIG_FOLDER, "config.ini")
 
 # Create config folder
-if not os.path.exists(config_folder):
-    os.makedirs(config_folder)
+if not os.path.exists(CONFIG_FOLDER):
+    os.makedirs(CONFIG_FOLDER)
 
-if not os.path.isdir(config_folder):
-    raise ("'%s' must be a folder" % config_folder)
+if not os.path.isdir(CONFIG_FOLDER):
+    raise Exception("'%s' must be a folder" % CONFIG_FOLDER)
 
+
+def read_configuration():
+    """ Read configuration """
+    try:
+        CONFIG.read(CONFIG_FILE)
+    except Exception as exp:
+        print(exp)
+        return False
+    return True
 
 
 def transform_mac(macaddress):
+    """ clean macaddress """
     if len(macaddress) == 12:
-        macaddress = ":".join(map(lambda x,y: x + y,
-                              macaddress[::2],
-                              macaddress[1::2]))
+        macaddress = ":".join(map(lambda x, y: x + y,
+                                  macaddress[::2],
+                                  macaddress[1::2]))
     return macaddress
 
 
 def dbus_notify(pre_title, pre_message, title, message):
+    """ Notify using python2 Dbus """
     bus = dbus.SessionBus()
-    object = bus.get_object('org.freedesktop.Notifications','/org/freedesktop/Notifications')
-    interface = dbus.Interface(object,'org.freedesktop.Notifications')
-    #print(interface.GetCapabilities())
+    dbus_object = bus.get_object('org.freedesktop.Notifications',
+                                 '/org/freedesktop/Notifications')
+    interface = dbus.Interface(dbus_object,
+                               'org.freedesktop.Notifications')
+
+    # The next line print dbus capabilities
+    # print(interface.GetCapabilities())
 
     interface.Notify("SeaDevil",
                      0,
-                     #"icon-m-notifications",
                      "harbour-seadevil",
                      title,
                      message,
                      dbus.Array(["default", ""]),
                      dbus.Dictionary({"x-nemo-preview-body": pre_message,
                                       "x-nemo-preview-summary": pre_title},
-                                      signature='sv'),
+                                     signature='sv'),
                      0)
 
 
 def wake_on_lan(macaddress):
-    """ Switches on remote computers using WOL. 
+    """ Switches on remote computers using WOL.
         # Use macaddresses with any seperators.
         wake_on_lan('0F:0F:DF:0F:BF:EF')
         wake_on_lan('0F-0F-DF-0F-BF-EF')
@@ -116,9 +145,9 @@ def wake_on_lan(macaddress):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     try:
         sock.sendto(send_data, ('<broadcast>', 7))
-    except Exception(e):
-        print(e.message)
-        return False, e.message
+    except Exception as exp:
+        print(exp)
+        return False, str(exp)
     # Save mac address as last used
     save_last_mac(macaddress)
 
@@ -127,93 +156,87 @@ def wake_on_lan(macaddress):
 
 def save_last_mac(macaddress):
     """ Save last macaddress used """
-    try:
-        config.read(config_file)
-    except Exception(e):
-        print(e.message)
+    # Read configuration
+    if not read_configuration():
         return
-  
-    if not 'general' in config:
-          config['general'] = {}
 
-    config['general']['last'] = macaddress
-    with open(config_file, 'w') as config_f:
-        config.write(config_f)
+    if not 'general' in CONFIG:
+        CONFIG['general'] = {}
+
+    CONFIG['general']['last'] = macaddress
+    with open(CONFIG_FILE, 'w') as config_f:
+        CONFIG.write(config_f)
 
 
 def get_last_mac():
     """ Get last macaddress used """
-    try:
-        config.read(config_file)
-    except Exception(e):
-        print(e.message)
+    # Read configuration
+    if not read_configuration():
         return ''
 
-    if 'general' not in config.sections():
+    if 'general' not in CONFIG.sections():
         return ''
 
-    mac = config['general'].get('last', '')
+    mac = CONFIG['general'].get('last', '')
     return (transform_mac(mac), get_name(mac))
 
 
 def get_mac(name):
     """ Get mac address from name """
-    try:
-        config.read(config_file)
-    except Exception(e):
-        print(e.message)
+    # Read configuration
+    if not read_configuration():
         return ''
 
-    if 'computers' not in config.sections():
+    if 'computers' not in CONFIG.sections():
         return ''
 
-    return config['computers'].get(name, '')
+    return CONFIG['computers'].get(name, '')
 
 
 def get_name(macaddress):
     """ Get name from mac address """
-    try:
-        config.read(config_file)
-    except Exception(e):
-        print(e.message)
+    # Read configuration
+    if not read_configuration():
         return ''
 
-    if 'computers' not in config.sections():
+    if 'computers' not in CONFIG.sections():
         return ''
 
+    # Clean mac address
     macaddress = transform_mac(macaddress)
 
-    names = [name for name, mac in config['computers'].items() if mac == macaddress]
+    # Get name
+    names = [name for name, mac in CONFIG['computers'].items()
+             if mac == macaddress]
 
     if len(names) == 0:
+        # Name not found
         return ''
     else:
+        # Name found
         return names[0]
 
 
 def load_computers(first_name=None):
     """ Load save computer list
-    If first_name is set
-    it will be the first of the list
+        If first_name is set
+        it will be the first of the list
     """
-    try:
-        config.read(config_file)
-    except Exception(e):
-        print(e.message)
+    # Read configuration
+    if not read_configuration():
         return []
 
-    if 'computers' not in config.sections():
+    if 'computers' not in CONFIG.sections():
         return []
 
     # Prepare the computer list
-    computers = config['computers']
+    computers = CONFIG['computers']
     ret = []
 
     # Prepare the first element of the combobox
     if first_name is not None and first_name in computers.keys():
         ret.append({'name': first_name,
-                    'value': computers.get(first_name)
-                    })
+                    'value': computers.get(first_name),})
 
     # Complete the combobox
     for name, mac in computers.items():
@@ -225,61 +248,59 @@ def load_computers(first_name=None):
 
 def save_computer(name, macaddress):
     """ Save computer name and mac in config file """
-    try:
-        config.read(config_file)
-    except Exception(e):
-        print(e.message)
+    # Read configuration
+    if not read_configuration():
         return
-    if not 'computers' in config:
-        config['computers'] = {}
+
+    if not 'computers' in CONFIG:
+        CONFIG['computers'] = {}
 
     macaddress = transform_mac(macaddress)
 
-    config['computers'][name] = macaddress
-    with open(config_file, 'w') as config_f:
-        config.write(config_f)
+    CONFIG['computers'][name] = macaddress
+    with open(CONFIG_FILE, 'w') as config_f:
+        CONFIG.write(config_f)
 
     save_last_mac(macaddress)
 
 
 def set_cover(name, side):
     """ Save a computer name as cover right or left """
-    try:
-        config.read(config_file)
-    except Exception(e):
-        print(e.message)
+    # Read configuration
+    if not read_configuration():
         return
-    if not 'covers' in config:
-        config['covers'] = {}
+
+    if not 'covers' in CONFIG:
+        CONFIG['covers'] = {}
 
     # delete if is the same
-    if side in config['covers'] and config['covers'][side] == name:
-        del(config['covers'][side])
+    if side in CONFIG['covers'] and CONFIG['covers'][side] == name:
+        del CONFIG['covers'][side]
     else:
-        config['covers'][side] = name
+        CONFIG['covers'][side] = name
 
-    with open(config_file, 'w') as config_f:
-        config.write(config_f)
+    with open(CONFIG_FILE, 'w') as config_f:
+        CONFIG.write(config_f)
 
 
 def delete_computer(name):
     """ Delete computer from config file """
-    try:
-        config.read(config_file)
-    except Exception(e):
-        print(e.message)
-        return False
-    if not 'computers' in config:
+    # Read configuration
+    if not read_configuration():
         return False
 
-    if not name in config['computers']:
+    if not 'computers' in CONFIG:
         return False
 
-    del(config['computers'][name])
+    if not name in CONFIG['computers']:
+        return False
 
-    with open(config_file, 'w') as config_f:
-        config.write(config_f)
+    del CONFIG['computers'][name]
 
+    with open(CONFIG_FILE, 'w') as config_f:
+        CONFIG.write(config_f)
+
+    # Get desktop file path
     desktop_file_name = get_desktop_file_name(name)
     desktop_file_path = os.path.join(os.getenv("HOME"),
                                      ".local/share/applications/",
@@ -292,63 +313,74 @@ def delete_computer(name):
 
 def get_cover(side):
     """ Get COVER mac address from config file """
-    try:
-        config.read(config_file)
-    except Exception(e):
-        print(e.message)
+    # Read configuration
+    if not read_configuration():
         return False
-  
-    if not 'covers' in config:
+
+    if not 'covers' in CONFIG:
         return False
-  
-    if not side in config['covers']:
+
+    if not side in CONFIG['covers']:
         return False
-  
-    mac = get_mac(config['covers'][side])
+
+    mac = get_mac(CONFIG['covers'][side])
     if mac != '':
+        # return mac address
         return mac
+
     return False
 
 
 def wol_from_cover(side):
     """ Wake up from a cover """
     mac = get_cover(side)
-    if mac != False:
+    if mac is not False:
         wake_on_lan(mac)
 
 
 def get_desktop_file_name(name):
+    """ Determine desktop file name """
     return "seafile-" + name + ".desktop"
 
 
 def set_desktop_file(name):
+    """ Create or delete a desktop file """
+    # Prepare file content
     data = {}
     data['name'] = name
     data['mac'] = get_mac(name)
     data['icon'] = "harbour-seadevil"
-    data['exec'] = """python /usr/share/harbour-seadevil/scripts/seadevil-cli.py "%(mac)s" "%(name)s" """ % data
-    data['comment'] = "Seafile shortcut desktop file for %(name)s/%(mac)s" % data
+    data['exec'] = ("""python /usr/share/harbour-seadevil/scripts/"""
+                    """seadevil-cli.py "%(mac)s" "%(name)s" """ % data)
+    data['comment'] = ("""Seafile shortcut desktop file for """
+                       """%(name)s/%(mac)s""" % data)
+
+    # Get desktop file path
     desktop_file_name = get_desktop_file_name(name)
     desktop_file_path = os.path.join(os.getenv("HOME"),
                                      ".local/share/applications/",
                                      desktop_file_name)
+
     if not has_desktop_file(name):
+        # Write file
         content = ("[Desktop Entry]\n"
                    "Type=Application\n"
                    "Name=%(name)s\n"
                    "Icon=%(icon)s\n"
                    "Exec=%(exec)s\n"
                    "Comment=%(comment)s\n" % data)
-        f = open(desktop_file_path, "w")
-        f.write(content)
-        f.close()
+        desktop_fh = open(desktop_file_path, "w")
+        desktop_fh.write(content)
+        desktop_fh.close()
     else:
+        # Delete file
         os.remove(desktop_file_path)
 
 
 def has_desktop_file(name):
+    """ Check if a desktop file existe """
     desktop_file_name = get_desktop_file_name(name)
     desktop_file_path = os.path.join(os.getenv("HOME"),
                                      ".local/share/applications/",
-                                      desktop_file_name)
+                                     desktop_file_name)
     return os.path.exists(desktop_file_path)
